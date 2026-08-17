@@ -1,0 +1,134 @@
+@startuml
+title Library Management System Class Diagram
+
+package model {
+    abstract class User {
+        - id : String
+        - name : String
+        - email : String
+        + getId() : String
+        + getName() : String
+        + getEmail() : String
+    }
+
+    class Patron {
+        - borrowHistory : List<Book>
+        + addBorrowedBook(Book)
+        + getBorrowHistory() : List<Book>
+    }
+
+    class Book {
+        - title : String
+        - author : String
+        - isbn : String
+        - publicationYear : int
+        - genre : String
+        - isBorrowed : boolean
+        + getTitle() : String
+        + getAuthor() : String
+        + getIsbn() : String
+        + getPublicationYear() : int
+        + getGenre() : String
+        + isBorrowed() : boolean
+        + setBorrowed(boolean)
+    }
+
+    class Branch {
+        - name : String
+        - inventory : List<Book>
+        + addBook(Book)
+        + removeBook(Book)
+        + getInventory() : List<Book>
+    }
+
+    Patron --|> User
+}
+
+package service {
+    class BookService {
+        - books : List<Book>
+        + addBook(Book)
+        + removeBook(String)
+        + updateBook(Book)
+        + searchByTitle(String) : List<Book>
+        + searchByAuthor(String) : List<Book>
+        + searchByIsbn(String) : Book
+    }
+
+    class PatronService {
+        - patrons : List<Patron>
+        + addPatron(Patron)
+        + updatePatron(Patron)
+        + findPatronById(String) : Patron
+    }
+
+    class LendingService {
+        + checkoutBook(Book, Patron) : boolean
+        + returnBook(Book) : boolean
+    }
+
+    class InventoryService {
+        - books : List<Book>
+        + getAvailableBooks() : List<Book>
+        + getBorrowedBooks() : List<Book>
+    }
+
+    class ReservationService {
+        + reserveBook(Book, Patron)
+    }
+
+    class RecommendationService {
+        - strategy : RecommendationStrategy
+        + setStrategy(RecommendationStrategy)
+        + recommendBooks(Patron) : List<Book>
+    }
+}
+
+package observer {
+    interface Observer {
+        + update(String)
+    }
+
+    interface Subject {
+        + registerObserver(Observer)
+        + removeObserver(Observer)
+        + notifyObservers(String)
+    }
+
+    class ReservationNotifier {
+        - observers : List<Observer>
+        + registerObserver(Observer)
+        + removeObserver(Observer)
+        + notifyObservers(String)
+    }
+}
+
+package strategy {
+    interface RecommendationStrategy {
+        + recommend(Patron) : List<Book>
+    }
+
+    class AuthorBasedRecommendation {
+        + recommend(Patron) : List<Book>
+    }
+
+    class GenreBasedRecommendation {
+        + recommend(Patron) : List<Book>
+    }
+
+    RecommendationStrategy <|.. AuthorBasedRecommendation
+    RecommendationStrategy <|.. GenreBasedRecommendation
+}
+
+BookService --> Book
+PatronService --> Patron
+LendingService --> Book
+LendingService --> Patron
+InventoryService --> Book
+ReservationService --> Book
+ReservationService --> Patron
+RecommendationService --> Patron
+RecommendationService --> RecommendationStrategy
+ReservationNotifier --> Observer
+
+@enduml
